@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1200.0" styleClass="bodybg" stylesheets="@../css/LoginPage.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LoginController">
+   <children>
+      <Button fx:id="adminLoginBtn" layoutX="53.0" layoutY="156.0" mnemonicParsing="false" onAction="#checkAdminLogin" prefHeight="33.0" prefWidth="166.0" text="Login as Admin" />
+      <Button fx:id="helpBtn" layoutX="615.0" layoutY="624.0" mnemonicParsing="false" onAction="#showHelp" prefHeight="33.0" prefWidth="166.0" text="Help" />
+      <TextField fx:id="usernameTF" layoutX="109.0" layoutY="73.0" />
+      <Text layoutX="14.0" layoutY="91.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username:" wrappingWidth="94.8779296875" />
+      <Text layoutX="14.0" layoutY="134.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password:" wrappingWidth="94.8779296875" />
+      <PasswordField fx:id="passwordTF" layoutX="109.0" layoutY="117.0" />
+      <Text layoutX="301.0" layoutY="139.0" strokeType="OUTSIDE" strokeWidth="0.0" text="National Property Sales Ltd">
+         <font>
+            <Font size="46.0" />
+         </font>
+      </Text>
+      <Hyperlink fx:id="requestPWTF" layoutX="527.0" layoutY="703.0" onMouseClicked="#showForgottenPW" text="Forgotten password?">
+         <font>
+            <Font name="System Italic" size="13.0" />
+         </font>
+      </Hyperlink>
+      <Text layoutX="66.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Admin Login" wrappingWidth="85.09130859375" />
+      <Button fx:id="branchLoginBtn" layoutX="433.0" layoutY="624.0" mnemonicParsing="false" onAction="#checkBranchLogin" prefHeight="33.0" prefWidth="166.0" text="Branch Login" />
+      <TextField fx:id="branchTF" layoutX="540.0" layoutY="365.0" />
+      <Text layoutX="445.0" layoutY="383.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Username:" wrappingWidth="94.8779296875" />
+      <Text layoutX="445.0" layoutY="445.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Password:" wrappingWidth="94.8779296875" />
+      <PasswordField fx:id="branchPwTF" layoutX="540.0" layoutY="428.0" />
+   </children>
+</AnchorPane>
