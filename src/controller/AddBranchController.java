@@ -54,7 +54,6 @@ public class AddBranchController {
     }
 
     public void loadPrevious() {
-
         try {
             InputStream fis = new FileInputStream("branch.dat");
             ObjectInput ois = new ObjectInputStream(fis);

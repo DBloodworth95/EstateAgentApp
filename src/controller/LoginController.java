@@ -51,8 +51,8 @@ public class LoginController {
                     Object temp = loader.getController();
                     HomePageController controller = (HomePageController) temp;
                     controller.setLoggedInTF(session);
-                    controller.populateTable();
                     controller.setGhostSession(session);
+                    controller.populateTable();
                     break;
                 } else {
                     accountFound = false;
@@ -71,7 +71,7 @@ public class LoginController {
         }
         if (accountFound == true) {
             System.out.println("Login successful");
-        } else if (accountFound == false) {
+        } else {
             invalidPwAlert = new InvalidPasswordAlert();
             usernameTF.clear();
             passwordTF.clear();
@@ -99,8 +99,8 @@ public class LoginController {
                         controller.setLoggedInTF(session);
                         controller.setTitleTF(session);
                         controller.hideAdminPanel(session);
-                        controller.populateTable();
                         controller.setGhostSession(session);
+                        controller.populateTable();
                         break;
                     } else {
                         branchFound = false;
@@ -122,7 +122,7 @@ public class LoginController {
         }
         if (branchFound == true) {
             System.out.println("Login successful");
-        } else if (branchFound == false) {
+        } else {
             invalidPwAlert = new InvalidPasswordAlert();
         }
     }
