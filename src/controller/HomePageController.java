@@ -29,13 +29,15 @@ public class HomePageController {
     @FXML
     private Text loggedInTF, titleTF, adminTF, ghostSessionTF;
     @FXML
-    private Button addBrBtn, editBrBtn, refreshBtn;
+    private Button addBrBtn, editBrBtn, refreshBtn, searchBtn;
     @FXML
     private TableView homeTV;
     @FXML
     private TableColumn addressCol, floorCol, roomCol, floorsCol, sellPrCol, soldPrCol, monthCol, gardenCol, garageCol, typeCol, soldCol, idCol;
     @FXML
     private VBox adminPanelHBox;
+    @FXML
+    private TextField searchTF;
     private ArrayList<Property> properties = new ArrayList<>();
 
     public void setLoggedInTF(Session session) {
@@ -332,5 +334,78 @@ public class HomePageController {
 
         }
 
+    }
+
+    public void sendQuery() {
+        ObservableList<Property> rows = FXCollections.observableArrayList();
+        try {
+            InputStream fis = new FileInputStream("properties.dat");
+            ObjectInput ois = new ObjectInputStream(fis);
+            ArrayList<Property> allProperties = null;
+            Property property = null;
+            addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
+            roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
+            sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
+            soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
+            typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
+            soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
+            floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
+            gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
+            garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
+            monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
+            floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
+            idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
+
+            try {
+                while ((allProperties = (ArrayList<Property>) ois.readObject()) != null) {
+                    for (Property allProperty : allProperties) {
+                        if (allProperty instanceof House) {
+                            House house = (House) allProperty;
+                            if (house.getBranchName().equals(ghostSessionTF.getText()) && house.getSold().equals("N") || house.getSold().equals("n")) {
+                                if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                    System.out.println(house.getBranchName());
+                                    rows.add(house);
+                                }
+                            }
+                        }
+                        if (allProperty instanceof Flat) {
+                            Flat flat = (Flat) allProperty;
+                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) && allProperty.getSold().equals("N") || allProperty.getSold().equals("n")) {
+                                if (allProperty.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                    System.out.println(allProperty.getBranchName());
+                                    rows.add(flat);
+                                }
+                            }
+                        }
+                    }
+                }
+            } finally {
+
+                ois.close();
+            }
+        } catch (EOFException ex) {
+            System.out.println("End of file reached.");
+        } catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        homeTV.setItems(rows);
+        homeTV.setEditable(true);
+        addressCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        roomCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        sellPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        soldCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        floorsCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        floorCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        gardenCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        monthCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        setColumnsEditable();
     }
 }
