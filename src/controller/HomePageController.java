@@ -6,9 +6,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -21,8 +19,11 @@ import model.*;
 import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
+import view.ConfirmEntryDeleteAlert;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class HomePageController {
     @FXML
@@ -43,9 +44,9 @@ public class HomePageController {
 
     public void setTitleTF(Session session) {
         if (!session.getAccessLevel().equals("All")) {
-            titleTF.setText("All properties at Branch: " + session.getUsername());
+            titleTF.setText("All properties for sale at Branch: " + session.getUsername());
         } else {
-            titleTF.setText("All properties at all Branches.");
+            titleTF.setText("All properties for sale at all Branches.");
         }
     }
 
@@ -108,14 +109,14 @@ public class HomePageController {
                     for (Property allProperty : allProperties) {
                         if (allProperty instanceof House) {
                             House house = (House) allProperty;
-                            if (house.getBranchName().equals(ghostSessionTF.getText())) {
+                            if (house.getBranchName().equals(ghostSessionTF.getText()) && house.getSold().equals("N") || house.getSold().equals("n")) {
                                 System.out.println(house.getBranchName());
                                 rows.add(house);
                             }
                         }
                         if (allProperty instanceof Flat) {
                             Flat flat = (Flat) allProperty;
-                            if (allProperty.getBranchName().equals(ghostSessionTF.getText())) {
+                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) && allProperty.getSold().equals("N") || allProperty.getSold().equals("n")) {
                                 System.out.println(allProperty.getBranchName());
                                 rows.add(flat);
                             }
@@ -135,18 +136,17 @@ public class HomePageController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-
         homeTV.setItems(rows);
         homeTV.setEditable(true);
         addressCol.setCellFactory(TextFieldTableCell.forTableColumn());
         roomCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         sellPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        soldCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        soldCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
         floorsCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         floorCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Yes", "No"));
-        gardenCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        gardenCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
         monthCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
         soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
@@ -156,6 +156,22 @@ public class HomePageController {
     public void setColumnsEditable() {
         addressCol.setOnEditCommit(
                 (EventHandler<TableColumn.CellEditEvent<Property, String>>) propertyStringCellEditEvent -> ((Property) propertyStringCellEditEvent.getTableView().getItems().get(propertyStringCellEditEvent.getTablePosition().getRow())).setAddress(propertyStringCellEditEvent.getNewValue()));
+        floorCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Integer>>) propertyIntCellEditEvent -> ((Property) propertyIntCellEditEvent.getTableView().getItems().get(propertyIntCellEditEvent.getTablePosition().getRow())).setFloorNumber(propertyIntCellEditEvent.getNewValue()));
+        roomCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Integer>>) propertyIntCellEditEvent -> ((Property) propertyIntCellEditEvent.getTableView().getItems().get(propertyIntCellEditEvent.getTablePosition().getRow())).setRoomAmount(propertyIntCellEditEvent.getNewValue()));
+        floorsCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Integer>>) propertyIntCellEditEvent -> ((Property) propertyIntCellEditEvent.getTableView().getItems().get(propertyIntCellEditEvent.getTablePosition().getRow())).setFloorAmount(propertyIntCellEditEvent.getNewValue()));
+        sellPrCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Double>>) propertyDoubleCellEditEvent -> ((Property) propertyDoubleCellEditEvent.getTableView().getItems().get(propertyDoubleCellEditEvent.getTablePosition().getRow())).setSellPrice(propertyDoubleCellEditEvent.getNewValue()));
+        soldPrCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Double>>) propertyDoubleCellEditEvent -> ((Property) propertyDoubleCellEditEvent.getTableView().getItems().get(propertyDoubleCellEditEvent.getTablePosition().getRow())).setSoldPrice(propertyDoubleCellEditEvent.getNewValue()));
+        monthCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, Double>>) propertyDoubleCellEditEvent -> ((Property) propertyDoubleCellEditEvent.getTableView().getItems().get(propertyDoubleCellEditEvent.getTablePosition().getRow())).setMonthlyRate(propertyDoubleCellEditEvent.getNewValue()));
+        gardenCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, String>>) propertyStringCellEditEvent -> ((Property) propertyStringCellEditEvent.getTableView().getItems().get(propertyStringCellEditEvent.getTablePosition().getRow())).setGarden(propertyStringCellEditEvent.getNewValue()));
+        garageCol.setOnEditCommit(
+                (EventHandler<TableColumn.CellEditEvent<Property, String>>) propertyStringCellEditEvent -> ((Property) propertyStringCellEditEvent.getTableView().getItems().get(propertyStringCellEditEvent.getTablePosition().getRow())).setGarage(propertyStringCellEditEvent.getNewValue()));
     }
 
     public void openAddHouse() throws IOException {
@@ -217,6 +233,9 @@ public class HomePageController {
             if(typeCol.getCellData(i).toString().equals("House")) {
                 for (int p = 0; p < properties.size(); p++) {
                     if (properties.get(p).getId() == Integer.parseInt((String) idCol.getCellData(i).toString())) {
+                        if(!soldPrCol.getCellData(i).toString().equals("0.0")) {
+                            replaceHouse.setSold("Y");
+                        }
                         properties.set(p, replaceHouse);
                     }
                 }
@@ -224,6 +243,9 @@ public class HomePageController {
             if(typeCol.getCellData(i).toString().equals("Flat")) {
                 for (int p = 0; p < properties.size(); p++) {
                     if (properties.get(p).getId() == Integer.parseInt((String) idCol.getCellData(i).toString())) {
+                        if(!soldPrCol.getCellData(i).toString().equals("0.0")) {
+                            replaceFlat.setSold("Y");
+                        }
                         properties.set(p, replaceFlat);
                     }
                 }
@@ -269,6 +291,46 @@ public class HomePageController {
             ex.printStackTrace();
         }
     }
+    public void removeRow() {
+        Alert alert;
+        alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Deletion.");
+        alert.setHeaderText("Warning! You are about to delete a property.");
+        alert.setContentText("Are you sure? This change cannot be reverted.");
+        ButtonType yesBtn = new ButtonType("Yes");
+        ButtonType noBtn = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType cancelBtn = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(yesBtn, noBtn, cancelBtn);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == yesBtn) {
+            ObservableList<Property> allRows, singleRow;
+            allRows = homeTV.getItems();
+            singleRow = homeTV.getSelectionModel().getSelectedItems();
+            Property selectedItems = (Property) homeTV.getSelectionModel().getSelectedItems().get(0);
+            String firstCol = selectedItems.toString().split(",")[0];
+            fetchFile();
+            for (int p = 0; p < properties.size(); p++) {
+                if (properties.get(p).getId() == selectedItems.getId()) {
+                    properties.remove(p);
+                }
+            }
+            try {
+                OutputStream fstream = new FileOutputStream("properties.dat");
+                ObjectOutput oos = new ObjectOutputStream(fstream);
+                try {
+                    oos.writeObject(properties);
+                } finally {
+                    oos.close();
+                }
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+            singleRow.forEach(allRows::remove);
+        } else if (result.get() == null) {
 
+        } else {
 
+        }
+
+    }
 }

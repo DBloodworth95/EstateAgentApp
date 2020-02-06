@@ -19,7 +19,7 @@ public class AddFlatController {
 
     public void addFlat() throws IOException {
         Flat flat = new Flat(0,ghostSessionTF.getText(), addressTF.getText(), soldTF.getText(), "Flat", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
-                Double.parseDouble(soldPrTF.getText()), 0, Double.parseDouble(monthlyRTF.getText()), "N/A", "N/A", 0);
+                Double.parseDouble(soldPrTF.getText()), Integer.parseInt(floorNumberTF.getText()), Double.parseDouble(monthlyRTF.getText()), "N/A", "N/A", 0);
         loadPrevious();
         flat.setId(properties.size());
         properties.add(flat);

@@ -55,7 +55,7 @@
       </TableView>
       <Button layoutX="39.0" layoutY="443.0" mnemonicParsing="false" onAction="#openAddHouse" prefHeight="26.0" prefWidth="111.0" text="Add House" />
       <Button layoutX="39.0" layoutY="690.0" mnemonicParsing="false" onAction="#updateTable" text="Save Changes" />
-      <Button layoutX="28.0" layoutY="579.0" mnemonicParsing="false" text="Remove Selected" />
+      <Button layoutX="28.0" layoutY="579.0" mnemonicParsing="false" onAction="#removeRow" text="Remove Selected" />
       <Text fx:id="titleTF" layoutX="458.0" layoutY="133.0" strokeType="OUTSIDE" strokeWidth="0.0" text="All properties at all Branches" wrappingWidth="657.7294921875">
          <font>
             <Font size="26.0" />
