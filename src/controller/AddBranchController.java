@@ -19,11 +19,6 @@ public class AddBranchController {
     private ArrayList<Branch> branches = new ArrayList<>();
 
 
-    public void closeWindow() {
-        Stage stage = (Stage) closeWindowBtn.getScene().getWindow();
-        stage.close();
-    }
-
     public void addBranch() throws IOException {
         Branch branch = new Branch(nameTF.getText(), addressTF.getText(), phoneTF.getText(), emailTF.getText(), webTF.getText(), usernameTF.getText(), passwordTF.getText(), nameTF.getText());
         branches.add(branch);
@@ -77,6 +72,11 @@ public class AddBranchController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void closeWindow() {
+        Stage stage = (Stage) closeWindowBtn.getScene().getWindow();
+        stage.close();
     }
 
 }

@@ -19,8 +19,6 @@ import model.*;
 import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
-import view.ConfirmEntryDeleteAlert;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -335,7 +333,6 @@ public class HomePageController {
         }
 
     }
-
     public void sendQuery() {
         ObservableList<Property> rows = FXCollections.observableArrayList();
         try {
@@ -407,5 +404,50 @@ public class HomePageController {
         typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
         soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         setColumnsEditable();
+    }
+
+    public void openViewHouses() throws IOException {
+        FXMLLoader allHouseLoader = new FXMLLoader();
+        allHouseLoader.setLocation(getClass().getResource("/view/AllHousesView.fxml"));
+        Scene scene = new Scene(allHouseLoader.load(), 895,667);
+        Stage stage = new Stage();
+        stage.setTitle("View all Houses!");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+        Object temp = allHouseLoader.getController();
+        AllHousesController controller = (AllHousesController) temp;
+        controller.setSessionTF(getSessionName());
+        controller.populateTable();
+    }
+
+    public void openViewFlats() throws IOException {
+        FXMLLoader allFlatsLoader = new FXMLLoader();
+        allFlatsLoader.setLocation(getClass().getResource("/view/AllFlatsView.fxml"));
+        Scene scene = new Scene(allFlatsLoader.load(), 895,667);
+        Stage stage = new Stage();
+        stage.setTitle("View all Flats!");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+        Object temp = allFlatsLoader.getController();
+        AllFlatsController controller = (AllFlatsController) temp;
+        controller.setSessionTF(getSessionName());
+        controller.populateTable();
+    }
+
+    public void openViewSold() throws IOException {
+        FXMLLoader allSoldLoader = new FXMLLoader();
+        allSoldLoader.setLocation(getClass().getResource("/view/AllSoldView.fxml"));
+        Scene scene = new Scene(allSoldLoader.load(), 895,667);
+        Stage stage = new Stage();
+        stage.setTitle("View all Sold!");
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+        Object temp = allSoldLoader.getController();
+        AllSoldController controller = (AllSoldController) temp;
+        controller.setSessionTF(getSessionName());
+        controller.populateTable();
     }
 }

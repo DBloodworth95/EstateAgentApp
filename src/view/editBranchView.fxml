@@ -18,7 +18,7 @@
         </columns>
       </TableView>
       <Button layoutX="39.0" layoutY="412.0" mnemonicParsing="false" onAction="#updateBranches" text="Save Changes" />
-      <Button layoutX="628.0" layoutY="412.0" mnemonicParsing="false" text="Close" />
+      <Button fx:id="closeBtn" layoutX="628.0" layoutY="412.0" mnemonicParsing="false" onAction="#closeWindow" text="Close" />
       <Text layoutX="305.0" layoutY="35.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Modify Branches" />
       <Button layoutX="293.0" layoutY="412.0" mnemonicParsing="false" onAction="#removeRow" text="Remove Selected" />
    </children>

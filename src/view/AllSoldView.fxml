@@ -7,9 +7,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="667.0" prefWidth="895.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="667.0" prefWidth="895.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AllSoldController">
    <children>
-      <TableView fx:id="homeTV" layoutX="14.0" layoutY="88.0" prefHeight="521.0" prefWidth="871.0">
+      <TableView fx:id="soldTV" layoutX="14.0" layoutY="88.0" prefHeight="521.0" prefWidth="871.0">
          <columns>
             <TableColumn fx:id="addressCol" prefWidth="76.0" text="Address" />
             <TableColumn fx:id="floorCol" prefWidth="74.0" text="Floor" />
@@ -30,6 +30,7 @@
             <Font size="35.0" />
          </font>
       </Text>
-      <Button layoutX="819.0" layoutY="627.0" mnemonicParsing="false" text="Close" />
+      <Button fx:id="closeBtn" layoutX="819.0" layoutY="627.0" mnemonicParsing="false" onAction="#closeWindow" text="Close" />
+      <Text fx:id="ghostSessionTF" layoutX="95.0" layoutY="54.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
    </children>
 </AnchorPane>

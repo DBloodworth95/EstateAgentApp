@@ -1,8 +1,10 @@
 package controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import model.properties.House;
 import model.properties.Property;
 import java.io.*;
@@ -13,6 +15,8 @@ public class AddHouseController {
     private TextField addressTF, roomAmountTF, floorAmountTF, garageTF, gardenTF, sellPrTF, soldPrTF, soldTF;
     @FXML
     private Text ghostSessionTF;
+    @FXML
+    private Button closeBtn;
 
     private ArrayList<Property> properties = new ArrayList<>();
 
@@ -34,6 +38,7 @@ public class AddHouseController {
         catch(IOException exception) {
             exception.printStackTrace();
         }
+        clearAll();
     }
 
     public void loadPrevious() {
@@ -65,5 +70,21 @@ public class AddHouseController {
     public void setSessionTF(String name) {
         ghostSessionTF.setText(name);
         ghostSessionTF.setVisible(false);
+    }
+
+    private void clearAll() {
+        addressTF.clear();
+        roomAmountTF.clear();
+        floorAmountTF.clear();
+        garageTF.clear();
+        gardenTF.clear();
+        sellPrTF.clear();
+        soldPrTF.clear();
+        soldTF.clear();
+    }
+
+    public void closeWindow() {
+        Stage stage = (Stage) closeBtn.getScene().getWindow();
+        stage.close();
     }
 }

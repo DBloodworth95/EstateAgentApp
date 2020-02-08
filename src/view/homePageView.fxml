@@ -61,11 +61,11 @@
             <Font size="26.0" />
          </font>
       </Text>
-      <Button layoutX="1058.0" layoutY="333.0" mnemonicParsing="false" text="View all Houses" />
-      <Button layoutX="1066.0" layoutY="240.0" mnemonicParsing="false" text="View all Flats" />
-      <Button layoutX="1065.0" layoutY="430.0" mnemonicParsing="false" text="View all Sold" />
-      <TextField layoutX="400.0" layoutY="744.0" prefHeight="26.0" prefWidth="316.0" />
-      <Button layoutX="754.0" layoutY="744.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="164.0" text="Search by Address" />
+      <Button layoutX="1058.0" layoutY="333.0" mnemonicParsing="false" onAction="#openViewHouses" text="View all Houses" />
+      <Button layoutX="1066.0" layoutY="240.0" mnemonicParsing="false" onAction="#openViewFlats" text="View all Flats" />
+      <Button layoutX="1065.0" layoutY="430.0" mnemonicParsing="false" onAction="#openViewSold" text="View all Sold" />
+      <TextField fx:id="searchTF" layoutX="400.0" layoutY="744.0" prefHeight="26.0" prefWidth="316.0" />
+      <Button fx:id="searchBtn" layoutX="754.0" layoutY="744.0" mnemonicParsing="false" onAction="#sendQuery" prefHeight="26.0" prefWidth="164.0" text="Search by Address" />
       <Button layoutX="39.0" layoutY="510.0" mnemonicParsing="false" onAction="#openAddFlat" prefHeight="26.0" prefWidth="111.0" text="Add Flat" />
       <Text fx:id="ghostSessionTF" layoutX="80.0" layoutY="144.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
       <Button fx:id="refreshBtn" layoutX="198.0" layoutY="126.0" mnemonicParsing="false" onAction="#refresh" prefHeight="44.0" prefWidth="94.0" text="Refresh" />

@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import model.properties.Flat;
 import model.properties.Property;
 
@@ -15,6 +16,8 @@ public class AddFlatController {
     private TextField addressTF, roomAmountTF, floorNumberTF, monthlyRTF, sellPrTF, soldPrTF, soldTF;
     @FXML
     private Text ghostSessionTF;
+    @FXML
+    private Button closeBtn;
     private ArrayList<Property> properties = new ArrayList<>();
 
     public void addFlat() throws IOException {
@@ -35,6 +38,7 @@ public class AddFlatController {
         catch(IOException exception) {
             exception.printStackTrace();
         }
+        clearAll();
     }
 
     public void loadPrevious() {
@@ -67,5 +71,20 @@ public class AddFlatController {
     public void setSessionTF(String name) {
         ghostSessionTF.setText(name);
         ghostSessionTF.setVisible(false);
+    }
+
+    private void clearAll() {
+        addressTF.clear();
+        roomAmountTF.clear();
+        floorNumberTF.clear();
+        monthlyRTF.clear();
+        sellPrTF.clear();
+        soldPrTF.clear();
+        soldTF.clear();
+    }
+
+    public void closeWindow() {
+        Stage stage = (Stage) closeBtn.getScene().getWindow();
+        stage.close();
     }
 }
