@@ -27,7 +27,7 @@ public class HomePageController {
     @FXML
     private Text loggedInTF, titleTF, adminTF, ghostSessionTF;
     @FXML
-    private Button addBrBtn, editBrBtn, refreshBtn, searchBtn;
+    private Button addBrBtn, editBrBtn;
     @FXML
     private TableView homeTV;
     @FXML

@@ -54,8 +54,6 @@ public class LoginController {
                     controller.setGhostSession(session);
                     controller.populateTable();
                     break;
-                } else {
-                    accountFound = false;
                 }
             }
             ois.close();
@@ -69,7 +67,7 @@ public class LoginController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        if (accountFound == true) {
+        if (accountFound) {
             System.out.println("Login successful");
         } else {
             invalidPwAlert = new InvalidPasswordAlert();
@@ -86,8 +84,7 @@ public class LoginController {
             ArrayList<Branch> obj = null;
 
             while ((obj = (ArrayList<Branch>)ois.readObject())!=null) {
-                for (int i = 0; i < obj.size(); i++) {
-                    Branch branch = obj.get(i);
+                for (Branch branch : obj) {
                     if (branchTF.getText().equals(branch.getUsername()) && branchPwTF.getText().equals(branch.getPassword())) {
                         branchFound = true;
                         session = new Session(branch.getUsername(), branch.getPassword(), branch.getAccessLevel());
@@ -120,7 +117,7 @@ public class LoginController {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        if (branchFound == true) {
+        if (branchFound) {
             System.out.println("Login successful");
         } else {
             invalidPwAlert = new InvalidPasswordAlert();
