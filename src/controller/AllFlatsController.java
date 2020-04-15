@@ -26,9 +26,11 @@ public class AllFlatsController {
     @FXML
     private Button closeBtn;
     private ObservableList<Property> rows = FXCollections.observableArrayList();
-
+    //Populates the table for the All Flats window, setup each column to accept the appropriate field from a flat.
+    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of Flat.
+    //Check that the branch name of the flat matches the branch of the user logged in, and the flat isn't sold.
+    //If true then add the flat as a row in the table.
     public void populateTable() {
-
         try {
             InputStream fis = new FileInputStream("properties.dat");
             ObjectInput ois = new ObjectInputStream(fis);
@@ -52,9 +54,11 @@ public class AllFlatsController {
                     for (Property allProperty : allProperties) {
                         if (allProperty instanceof Flat) {
                             Flat flat = (Flat) allProperty;
-                            if (flat.getBranchName().equals(ghostSessionTF.getText()) && flat.getSold().equals("N") || flat.getSold().equals("n")) {
-                                System.out.println(flat.getBranchName());
-                                rows.add(flat);
+                            if (flat.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                                if  (flat.getSold().toLowerCase().equals("n")) {
+                                    System.out.println(flat.getBranchName());
+                                    rows.add(flat);
+                                }
                             }
                         }
                     }
@@ -74,14 +78,18 @@ public class AllFlatsController {
         }
         flatsTV.setItems(rows);
     }
-
+    //Sets an invisible TextField as the username of the user logged in, this can then be used as a reference when populating the table.
     public void setSessionTF(String name) {
         ghostSessionTF.setText(name);
         ghostSessionTF.setVisible(false);
     }
-
+    //Closes the window.
     public void closeWindow() {
         Stage stage = (Stage) closeBtn.getScene().getWindow();
         stage.close();
+    }
+    //Checks if the user is an admin.
+    private boolean isAdmin() {
+        return ghostSessionTF.getText().toLowerCase().equals("admin");
     }
 }

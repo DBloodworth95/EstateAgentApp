@@ -3,14 +3,14 @@ package model.properties;
 import java.io.Serializable;
 
 public class Property implements Serializable {
-    private String branchName, address, sold, type;
-    private int roomAmount;
-    private double sellPrice, soldPrice;
-    private int floorNumber;
-    private double monthlyRate;
-    private String garden, garage;
-    private int floorAmount;
-    private int id;
+    protected String branchName, address, sold, type;
+    protected int roomAmount;
+    protected double sellPrice, soldPrice;
+    protected int floorNumber;
+    protected double monthlyRate;
+    protected String garden, garage;
+    protected int floorAmount;
+    protected int id;
 
     public Property(int id, String branchName, String address, String sold, String type, int roomAmount, double sellPrice, double soldPrice, int floorNumber, double monthlyRate, String garden, String garage, int floorAmount) {
         this.id = id;

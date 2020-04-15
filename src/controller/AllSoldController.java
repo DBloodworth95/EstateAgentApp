@@ -27,7 +27,10 @@ public class AllSoldController {
     private Button closeBtn;
     private ObservableList<Property> rows = FXCollections.observableArrayList();
 
-
+    //Populates the table for the All Sold window, setup each column to accept the appropriate field from a sold property.
+    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of house or flat.
+    //Check that the branch name of the house/flat matches the branch of the user logged in, and the flat/house is sold.
+    //If true then add the property as a row in the table.
     public void populateTable() {
         try {
             InputStream fis = new FileInputStream("properties.dat");
@@ -52,16 +55,20 @@ public class AllSoldController {
                     for (Property allProperty : allProperties) {
                         if (allProperty instanceof House) {
                             House house = (House) allProperty;
-                            if (house.getBranchName().equals(ghostSessionTF.getText()) && house.getSold().equals("Y") || house.getSold().equals("y")) {
-                                System.out.println(house.getBranchName());
-                                rows.add(house);
+                            if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                                if (house.getSold().toLowerCase().equals("y")) {
+                                    System.out.println(house.getBranchName());
+                                    rows.add(house);
+                                }
                             }
                         }
                         if (allProperty instanceof Flat) {
                             Flat flat = (Flat) allProperty;
-                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) && allProperty.getSold().equals("Y") || allProperty.getSold().equals("y")) {
-                                System.out.println(allProperty.getBranchName());
-                                rows.add(flat);
+                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                                if (allProperty.getSold().toLowerCase().equals("y")) {
+                                    System.out.println(allProperty.getBranchName());
+                                    rows.add(flat);
+                                }
                             }
                         }
                     }
@@ -82,14 +89,19 @@ public class AllSoldController {
         }
         soldTV.setItems(rows);
     }
-
+    //Sets an invisible TextField as the username of the user logged in, this can then be used as a reference when populating the table.
     public void setSessionTF(String name) {
         ghostSessionTF.setText(name);
         ghostSessionTF.setVisible(false);
     }
-
+    //Closes the window.
     public void closeWindow() {
         Stage stage = (Stage) closeBtn.getScene().getWindow();
         stage.close();
+    }
+
+    //Checks if the user is an admin.
+    private boolean isAdmin() {
+        return ghostSessionTF.getText().toLowerCase().equals("admin");
     }
 }

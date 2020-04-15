@@ -6,13 +6,12 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import model.Branch;
-import model.Session;
-import model.User;
+import model.*;
 import view.HelpAlert;
 import view.ForgotPasswordAlert;
 import view.InvalidPasswordAlert;
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class LoginController {
@@ -26,25 +25,31 @@ public class LoginController {
     private ForgotPasswordAlert pwHelpAlert;
     private InvalidPasswordAlert invalidPwAlert;
     private Session session;
-
+    private DatPropertyRepository propertyRepository = new DatPropertyRepository(Paths.get("property"));
+    private DatBranchRepository branchRepository = new DatBranchRepository(Paths.get("branch"));
+    //Displays an alert to help the user with any login issues.
     public void showHelp() {
         helpAlert = new HelpAlert();
     }
-
+    //Displays an alert to help the user if they've forgotten their password.
     public void showForgottenPW() {
         pwHelpAlert = new ForgotPasswordAlert();
     }
-    public void checkAdminLogin() throws Exception {
+    //Processes an admin login, reads the user.dat file for any credentials matching that in the login forms.
+    //If true, display the home page, populate the home page table and set the "Logged in as" text to show the users name.
+    //If false, display invalid username/password.
+    public void checkAdminLogin() {
         boolean accountFound = false;
         try {
             FileInputStream fis = new FileInputStream("users.dat");
             ObjectInputStream ois = new ObjectInputStream(fis);
-            User obj = null;
+            Admin obj = null;
 
-            while ((obj = (User)ois.readObject())!=null) {
-                if(usernameTF.getText().equals(obj.getUsername()) && passwordTF.getText().equals(obj.getPassword())) {
+            while ((obj = (Admin)ois.readObject())!=null) {
+                if(usernameTF.getText().toLowerCase().equals(obj.getUsername()) && passwordTF.getText().toLowerCase().equals(obj.getPassword())) {
                     accountFound = true;
-                    session = new Session(obj.getUsername(), obj.getPassword(), obj.getAccessLevel());
+                    session = new Session(obj, null);
+                    session.getAdmin().setPropertyList(branchRepository.findAll());
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
                     Parent homePage = loader.load();
                     adminLoginBtn.getScene().setRoot(homePage);
@@ -52,7 +57,7 @@ public class LoginController {
                     HomePageController controller = (HomePageController) temp;
                     controller.setLoggedInTF(session);
                     controller.setGhostSession(session);
-                    controller.populateTable();
+                    controller.populateTable(session);
                     break;
                 }
             }
@@ -66,6 +71,8 @@ public class LoginController {
             ex.printStackTrace();
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (accountFound) {
             System.out.println("Login successful");
@@ -76,6 +83,9 @@ public class LoginController {
         }
     }
 
+    //Processes an branch secretary login, reads the branch.dat file for any credentials matching that in the login forms.
+    //If true, display the home page, populate the home page table and set the "Logged in as" text to show the users name.
+    //If false, display invalid username/password.
     public void checkBranchLogin() throws Exception {
         boolean branchFound = false;
         try {
@@ -87,7 +97,8 @@ public class LoginController {
                 for (Branch branch : obj) {
                     if (branchTF.getText().equals(branch.getUsername()) && branchPwTF.getText().equals(branch.getPassword())) {
                         branchFound = true;
-                        session = new Session(branch.getUsername(), branch.getPassword(), branch.getAccessLevel());
+                        session = new Session(null, branch);
+                        session.getBranch().setPropertyList(propertyRepository.findAll(session.getBranch().getName()));
                         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
                         Parent homePage = loader.load();
                         adminLoginBtn.getScene().setRoot(homePage);
@@ -97,7 +108,7 @@ public class LoginController {
                         controller.setTitleTF(session);
                         controller.hideAdminPanel(session);
                         controller.setGhostSession(session);
-                        controller.populateTable();
+                        controller.populateTable(session);
                         break;
                     } else {
                         branchFound = false;

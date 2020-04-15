@@ -10,7 +10,7 @@
       <Text layoutX="219.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Enter new House details." />
       <TextField fx:id="addressTF" layoutX="277.0" layoutY="105.0" />
       <Button fx:id="addHouseBtn" layoutX="206.0" layoutY="482.0" mnemonicParsing="false" onAction="#addHouse" text="Add" />
-      <Button fx:id="closeWindowBtn" layoutX="341.0" layoutY="482.0" mnemonicParsing="false" text="Close" />
+      <Button fx:id="closeBtn" layoutX="341.0" layoutY="482.0" mnemonicParsing="false" onAction="#closeWindow" text="Close" />
       <Text layoutX="175.0" layoutY="122.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Address:" />
       <TextField fx:id="roomAmountTF" layoutX="277.0" layoutY="148.0" />
       <Text layoutX="153.0" layoutY="166.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Amount of Rooms:" />

@@ -1,16 +1,21 @@
 package model;
 
-import java.io.Serializable;
+import model.properties.Property;
 
-public class User implements Serializable {
+import java.io.Serializable;
+import java.util.List;
+
+public class Admin implements Serializable {
     private String username;
     private String password;
     private String accessLevel;
+    private List<Branch> branchList;
 
-    public User(String username, String password, String accessLevel) {
+    public Admin(String username, String password, String accessLevel, List<Branch> branchList) {
         this.username = username;
         this.password = password;
         this.accessLevel = accessLevel;
+        this.branchList = branchList;
     }
 
     public String getUsername() {
@@ -35,5 +40,13 @@ public class User implements Serializable {
 
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
+    }
+
+    public List<Branch> getPropertyList() {
+        return branchList;
+    }
+
+    public void setPropertyList(List<Branch> branchList) {
+        this.branchList = branchList;
     }
 }

@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
@@ -12,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
@@ -20,6 +22,7 @@ import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -27,7 +30,7 @@ public class HomePageController {
     @FXML
     private Text loggedInTF, titleTF, adminTF, ghostSessionTF;
     @FXML
-    private Button addBrBtn, editBrBtn;
+    private Button addBrBtn, editBrBtn, logoutBtn;
     @FXML
     private TableView homeTV;
     @FXML
@@ -37,19 +40,24 @@ public class HomePageController {
     @FXML
     private TextField searchTF;
     private ArrayList<Property> properties = new ArrayList<>();
-
+    private DatPropertyRepository propertyRepository = new DatPropertyRepository(Paths.get("files"));
+    //Fetches the username of the session, sets the loggedin Textfield to the users name to let them know who's signed in.
     public void setLoggedInTF(Session session) {
-        loggedInTF.setText("Logged in as " + session.getUsername() + " branch secretary");
+        if(session.isAdmin()) {
+            loggedInTF.setText("Logged in as " + session.getBranch().getUsername() + " branch secretary");
+        } else {
+            loggedInTF.setText("Logged in as admin");
+        }
     }
-
+    //Sets the main title of the window based on the current sesssion's username.
     public void setTitleTF(Session session) {
-        if (!session.getAccessLevel().equals("All")) {
-            titleTF.setText("All properties for sale at Branch: " + session.getUsername());
+        if (session.isAdmin()) {
+            titleTF.setText("All properties for sale at Branch: " + session.getBranch().getUsername());
         } else {
             titleTF.setText("All properties for sale at all Branches.");
         }
     }
-
+    //Opens the window to add a branch.
     public void openAddBranchView() throws IOException {
         FXMLLoader addBranchLoader = new FXMLLoader();
         addBranchLoader.setLocation(getClass().getResource("/view/addBranchView.fxml"));
@@ -58,102 +66,115 @@ public class HomePageController {
         stage.setTitle("Add a Branch!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
     }
-
+    //Opens the window to edit a branch.
     public void openEditBranchView() throws Exception {
         FXMLLoader editBranchLoader = new FXMLLoader();
         editBranchLoader.setLocation(getClass().getResource("/view/editBranchView.fxml"));
-        Scene scene = new Scene(editBranchLoader.load(), 718,463);
+        Scene scene = new Scene(editBranchLoader.load(), 823,463);
         Stage stage = new Stage();
         stage.setTitle("Edit a Branch!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = editBranchLoader.getController();
         EditBranchController controller = (EditBranchController) temp;
         controller.populateEditTable();
     }
-
+    //This gets called when login is successfull.
+    //Check the access level of the user logged in, if the access level isn't "all" then hide the admin panel.
     public void hideAdminPanel(Session session) {
-        if (!session.getAccessLevel().equals("All")) {
+        if (session.isAdmin()) {
             adminPanelHBox.setVisible(false);
             adminTF.setVisible(false);
             addBrBtn.setVisible(false);
             editBrBtn.setVisible(false);
         }
     }
-
-    public void populateTable() {
+    //Populates the table for the Home page window, setup each column to accept the appropriate field from a property.
+    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of house or flat.
+    //Check that the branch name of the house/flat matches the branch of the user logged in, and the flat/house is not sold.
+    //If true then add the property as a row in the table.
+    public void populateTable(Session session) {
         ObservableList<Property> rows = FXCollections.observableArrayList();
-        try {
-            InputStream fis = new FileInputStream("properties.dat");
-            ObjectInput ois = new ObjectInputStream(fis);
-            ArrayList<Property> allProperties = null;
-            Property property = null;
-            addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
-            roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
-            sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
-            soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
-            typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
-            soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
-            floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
-            gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
-            garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
-            monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
-            floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
-            idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
-
-            try {
-                while ((allProperties = (ArrayList<Property>) ois.readObject()) != null) {
-                    for (Property allProperty : allProperties) {
-                        if (allProperty instanceof House) {
-                            House house = (House) allProperty;
-                            if (house.getBranchName().equals(ghostSessionTF.getText()) && house.getSold().equals("N") || house.getSold().equals("n")) {
-                                System.out.println(house.getBranchName());
-                                rows.add(house);
-                            }
-                        }
-                        if (allProperty instanceof Flat) {
-                            Flat flat = (Flat) allProperty;
-                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) && allProperty.getSold().equals("N") || allProperty.getSold().equals("n")) {
-                                System.out.println(allProperty.getBranchName());
-                                rows.add(flat);
-                            }
+        addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
+        roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
+        sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
+        soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
+        soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
+        floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
+        gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
+        garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
+        monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
+        floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
+        idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
+        if(!session.isAdmin()) {
+            for (Property allProperty : propertyRepository.findAll("admin")) {
+                if (allProperty instanceof House) {
+                    House house = (House) allProperty;
+                    if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            System.out.println(house.getBranchName());
+                            rows.add(house);
                         }
                     }
                 }
-            } finally {
-
-                ois.close();
+                if (allProperty instanceof Flat) {
+                    Flat flat = (Flat) allProperty;
+                    if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (flat.getSold().toLowerCase().equals("n")) {
+                            System.out.println(allProperty.getBranchName());
+                            rows.add(flat);
+                        }
+                    }
+                }
             }
-        } catch (EOFException ex) {
-            System.out.println("End of file reached.");
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } else {
+            for (Property allProperty : session.getBranch().getPropertyList()) {
+                if (allProperty instanceof House) {
+                    House house = (House) allProperty;
+                    if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            System.out.println(house.getBranchName());
+                            rows.add(house);
+                        }
+                    }
+                }
+                if (allProperty instanceof Flat) {
+                    Flat flat = (Flat) allProperty;
+                    if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (flat.getSold().toLowerCase().equals("n")) {
+                            System.out.println(allProperty.getBranchName());
+                            rows.add(flat);
+                        }
+                    }
+                }
+            }
         }
-        homeTV.setItems(rows);
-        homeTV.setEditable(true);
-        addressCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        roomCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        sellPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        soldCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
-        floorsCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        floorCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
-        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
-        gardenCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
-        monthCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        setColumnsEditable();
-    }
 
+    homeTV.setItems(rows);
+    homeTV.setEditable(true);
+    addressCol.setCellFactory(TextFieldTableCell.forTableColumn());
+    roomCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+    sellPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+    soldCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+    floorsCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+    floorCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+    typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+    garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+    gardenCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+    monthCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+    typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+    soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+    setColumnsEditable();
+    }
+    //Gets called when populating the table, allows the columns in the table to be editable during the session.
     public void setColumnsEditable() {
+
         addressCol.setOnEditCommit(
                 (EventHandler<TableColumn.CellEditEvent<Property, String>>) propertyStringCellEditEvent -> ((Property) propertyStringCellEditEvent.getTableView().getItems().get(propertyStringCellEditEvent.getTablePosition().getRow())).setAddress(propertyStringCellEditEvent.getNewValue()));
         floorCol.setOnEditCommit(
@@ -173,7 +194,7 @@ public class HomePageController {
         garageCol.setOnEditCommit(
                 (EventHandler<TableColumn.CellEditEvent<Property, String>>) propertyStringCellEditEvent -> ((Property) propertyStringCellEditEvent.getTableView().getItems().get(propertyStringCellEditEvent.getTablePosition().getRow())).setGarage(propertyStringCellEditEvent.getNewValue()));
     }
-
+    //Opens the window to add a house.
     public void openAddHouse() throws IOException {
         FXMLLoader addHouseLoader = new FXMLLoader();
         addHouseLoader.setLocation(getClass().getResource("/view/addHouseView.fxml"));
@@ -182,12 +203,13 @@ public class HomePageController {
         stage.setTitle("Add a House!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = addHouseLoader.getController();
         AddHouseController controller = (AddHouseController) temp;
         controller.setSessionTF(getSessionName());
     }
-
+    //Opens the window to add a flat.
     public void openAddFlat() throws IOException {
         FXMLLoader addFlatLoader = new FXMLLoader();
         addFlatLoader.setLocation(getClass().getResource("/view/addFlatView.fxml"));
@@ -196,31 +218,44 @@ public class HomePageController {
         stage.setTitle("Add a Flat!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = addFlatLoader.getController();
         AddFlatController controller = (AddFlatController) temp;
         controller.setSessionTF(getSessionName());
     }
-
+    //Sets an invisible TextField to the users username, this can be used as a reference when checking which properties to show based on the name of the branch.
     public void setGhostSession(Session session) {
-        ghostSessionTF.setText(session.getUsername());
-        ghostSessionTF.setVisible(false);
+        if(session.isAdmin()) {
+            ghostSessionTF.setText(session.getBranch().getUsername());
+            ghostSessionTF.setVisible(false);
+        }
+        else {
+            ghostSessionTF.setText(session.getAdmin().getUsername());
+            ghostSessionTF.setVisible(false);
+        }
     }
-
+    //Returns the sessions username.
     public String getSessionName() {
         String name = ghostSessionTF.getText();
         return name;
     }
-
+    //Clears all items in the main table, re-populates.
     public void refresh() {
         homeTV.getItems().clear();
-        populateTable();
+        //populateTable();
     }
-
+    //Call this when save button is pressed.
+    //Fetch the previous state of the properties file, add it to the global ArrayList.
+    //Loop through each row in the table, store each row in a new instance of either house or flat, based on the value in the "Type" column.
+    //Add these instances to the global ArrayList.
+    //Write to the properties.dat file and store the house/flat objects in an ArrayList
+    //Before writing, check if the sold price value has been changed, if the value is above 0, set the sold value to "Y".
     public void updateTable() {
         fetchFile();
         House house;
         Flat flat;
+        String garage = garageCol.getCellValueFactory().toString();
         for (int i = 0; i < homeTV.getItems().size(); i++) {
             House replaceHouse = new House(Integer.parseInt((String) idCol.getCellData(i).toString()), ghostSessionTF.getText(), addressCol.getCellData(i).toString(), soldCol.getCellData(i).toString(), typeCol.getCellData(i).toString(),
                     Integer.parseInt((String) roomCol.getCellData(i).toString()), Double.parseDouble((String) sellPrCol.getCellData(i).toString()), Double.parseDouble((String) soldPrCol.getCellData(i).toString()), Integer.parseInt((String) floorCol.getCellData(i).toString()), Double.parseDouble((String) monthCol.getCellData(i).toString()),
@@ -264,7 +299,9 @@ public class HomePageController {
             exception.printStackTrace();
         }
     }
-
+    //Reads the current state of properties.dat, stores all the objects in the ArrayList in the global ArrayList during runtime.
+    //This can be used when writing/updating properties as the current state will need to be written to the new state of the file with the addition
+    //of the updates.
     public void fetchFile() {
         properties.removeAll(properties);
         try {
@@ -291,6 +328,10 @@ public class HomePageController {
             ex.printStackTrace();
         }
     }
+    //Removes the selected row from the table and file.
+    //Prompts the user with a warning that this action cannot be reverted, would they like to proceed?
+    //If yes, then update the properties.dat by fetching the current state of the file, find the ID of the property selected and remove it from the file.
+    //Overwrite the file with the updated changes.
     public void removeRow() {
         Alert alert;
         alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -333,6 +374,8 @@ public class HomePageController {
         }
 
     }
+    //Similar to populateTable, except this re-populates the table with any property names that match the value in the search field.
+    //During this, it will perform checks such as only displaying properties that aren't sold and are from the branch as the secretary logged in.
     public void sendQuery() {
         ObservableList<Property> rows = FXCollections.observableArrayList();
         try {
@@ -358,19 +401,23 @@ public class HomePageController {
                     for (Property allProperty : allProperties) {
                         if (allProperty instanceof House) {
                             House house = (House) allProperty;
-                            if (house.getBranchName().equals(ghostSessionTF.getText()) && house.getSold().equals("N") || house.getSold().equals("n")) {
-                                if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                    System.out.println(house.getBranchName());
-                                    rows.add(house);
+                            if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                                if (house.getSold().toLowerCase().equals("n")) {
+                                    if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                        System.out.println(house.getBranchName());
+                                        rows.add(house);
+                                    }
                                 }
                             }
                         }
                         if (allProperty instanceof Flat) {
                             Flat flat = (Flat) allProperty;
-                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) && allProperty.getSold().equals("N") || allProperty.getSold().equals("n")) {
-                                if (allProperty.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                    System.out.println(allProperty.getBranchName());
-                                    rows.add(flat);
+                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                                if (allProperty.getSold().toLowerCase().equals("n")) {
+                                    if (allProperty.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                        System.out.println(allProperty.getBranchName());
+                                        rows.add(flat);
+                                    }
                                 }
                             }
                         }
@@ -405,7 +452,7 @@ public class HomePageController {
         soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         setColumnsEditable();
     }
-
+    //Opens the window that shows houses.
     public void openViewHouses() throws IOException {
         FXMLLoader allHouseLoader = new FXMLLoader();
         allHouseLoader.setLocation(getClass().getResource("/view/AllHousesView.fxml"));
@@ -414,13 +461,14 @@ public class HomePageController {
         stage.setTitle("View all Houses!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = allHouseLoader.getController();
         AllHousesController controller = (AllHousesController) temp;
         controller.setSessionTF(getSessionName());
         controller.populateTable();
     }
-
+    //Opens the window that shows flats.
     public void openViewFlats() throws IOException {
         FXMLLoader allFlatsLoader = new FXMLLoader();
         allFlatsLoader.setLocation(getClass().getResource("/view/AllFlatsView.fxml"));
@@ -429,13 +477,14 @@ public class HomePageController {
         stage.setTitle("View all Flats!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = allFlatsLoader.getController();
         AllFlatsController controller = (AllFlatsController) temp;
         controller.setSessionTF(getSessionName());
         controller.populateTable();
     }
-
+    //Opens the window that shows all sold properties.
     public void openViewSold() throws IOException {
         FXMLLoader allSoldLoader = new FXMLLoader();
         allSoldLoader.setLocation(getClass().getResource("/view/AllSoldView.fxml"));
@@ -444,10 +493,26 @@ public class HomePageController {
         stage.setTitle("View all Sold!");
         stage.setScene(scene);
         stage.setResizable(false);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.show();
         Object temp = allSoldLoader.getController();
         AllSoldController controller = (AllSoldController) temp;
         controller.setSessionTF(getSessionName());
         controller.populateTable();
+    }
+    //Checks if the current user is an admin.
+    private boolean isAdmin() {
+        return ghostSessionTF.getText().toLowerCase().equals("admin");
+    }
+    //Called then logout button is pressed.
+    //Closes the current window and displays the login window.
+    public void handleLogout() throws IOException {
+        Stage stage = (Stage) logoutBtn.getScene().getWindow();
+        stage.close();
+        Parent root = FXMLLoader.load(getClass().getResource("../view/loginView.fxml"));
+        stage.setTitle("National Estate Agents Application");
+        stage.setScene(new Scene(root, 1200, 800));
+        stage.setResizable(false);
+        stage.show();
     }
 }

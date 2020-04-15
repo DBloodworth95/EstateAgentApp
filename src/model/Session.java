@@ -1,37 +1,31 @@
 package model;
 
 public class Session {
-    private String username;
-    private String password;
-    private String accessLevel;
+    private Admin admin;
+    private Branch branch;
 
-    public Session(String username, String password, String accessLevel) {
-        this.username = username;
-        this.password = password;
-        this.accessLevel = accessLevel;
+    public Session(Admin admin, Branch branch) {
+        this.admin = admin;
+        this.branch = branch;
     }
 
-    public String getUsername() {
-        return username;
+    public Admin getAdmin() {
+        return admin;
     }
 
-    public String getPassword() {
-        return password;
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
     }
 
-    public String getAccessLevel() {
-        return accessLevel;
+    public Branch getBranch() {
+        return branch;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setBranch(Branch branch) {
+        this.branch = branch;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setAccessLevel(String accessLevel) {
-        this.accessLevel = accessLevel;
+    public boolean isAdmin() {
+        return branch != null;
     }
 }
