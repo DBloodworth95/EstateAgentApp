@@ -1,20 +1,15 @@
 package model;
 
-import model.properties.Flat;
 import model.properties.Property;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class DatBranchRepositoryTest {

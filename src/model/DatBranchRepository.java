@@ -34,6 +34,7 @@ public class DatBranchRepository implements BranchRepository {
                     if (foundBranch.getId() == id) {
                         file.delete();
                     }
+                    break;
                 }
             } catch(EOFException e) {
                 System.out.println("End of file");
@@ -51,6 +52,7 @@ public class DatBranchRepository implements BranchRepository {
                 while ((foundBranch = (Branch) ois.readObject()) != null) {
                         file.delete();
                 }
+                break;
             } catch(EOFException e) {
                 System.out.println("End of file");
             }
@@ -68,6 +70,7 @@ public class DatBranchRepository implements BranchRepository {
                 try {
                     while ((branch = (Branch) ois.readObject()) != null) {
                         branchList.add(branch);
+                        break;
                     }
                 } catch (EOFException e) {
                     System.out.println("End of file");
@@ -77,5 +80,15 @@ public class DatBranchRepository implements BranchRepository {
             }
         }
         return branchList;
+    }
+
+    @Override
+    public Branch find(String name, String password) {
+        List<Branch> branches = findAll();
+        for(Branch b: branches) {
+            if (b.getName().toLowerCase().equals(name.toLowerCase()) && b.getPassword().toLowerCase().equals(password.toLowerCase()))
+                return b;
+        }
+        return null;
     }
 }

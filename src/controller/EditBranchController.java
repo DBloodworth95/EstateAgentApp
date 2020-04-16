@@ -74,7 +74,7 @@ public class EditBranchController {
         Branch branch;
         branchRepository.removeAll();
         for (int i = 0; i < editTV.getItems().size(); i++) {
-           branch = new Branch((Integer) idCol.getCellData(i), nameCol.getCellData(i).toString(), addressCol.getCellData(i).toString(), phoneCol.getCellData(i).toString(), emailCol.getCellData(i).toString(), webCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), propertyRepository.findAll(nameCol.getCellData(i).toString()));
+           branch = new Branch((Integer) idCol.getCellData(i), nameCol.getCellData(i).toString(), addressCol.getCellData(i).toString(), phoneCol.getCellData(i).toString(), emailCol.getCellData(i).toString(), webCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), nameCol.getCellData(i).toString(), propertyRepository.findByBranch(nameCol.getCellData(i).toString()));
            branchRepository.put(branch);
         }
     }

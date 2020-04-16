@@ -7,7 +7,9 @@ import java.util.List;
 public interface PropertyRepository {
     void put(Property property);
 
-    void remove(String name);
+    void remove(int id);
 
-    List<Property> findAll(String name);
+    List<Property> findByBranch(String name);
+
+    List<Property> findAll();
 }

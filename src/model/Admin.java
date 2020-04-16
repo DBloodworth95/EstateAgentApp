@@ -1,7 +1,4 @@
 package model;
-
-import model.properties.Property;
-
 import java.io.Serializable;
 import java.util.List;
 

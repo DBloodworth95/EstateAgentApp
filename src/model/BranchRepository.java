@@ -11,4 +11,6 @@ public interface BranchRepository {
     void removeAll() throws IOException, ClassNotFoundException;
 
     List<Branch> findAll();
+
+    Branch find(String name, String password);
 }

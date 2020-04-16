@@ -40,7 +40,7 @@ public class HomePageController {
     @FXML
     private TextField searchTF;
     private ArrayList<Property> properties = new ArrayList<>();
-    private DatPropertyRepository propertyRepository = new DatPropertyRepository(Paths.get("files"));
+    private DatPropertyRepository propertyRepository = new DatPropertyRepository(Paths.get("property"));
     //Fetches the username of the session, sets the loggedin Textfield to the users name to let them know who's signed in.
     public void setLoggedInTF(Session session) {
         if(session.isAdmin()) {
@@ -113,12 +113,11 @@ public class HomePageController {
         floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
         idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
         if(!session.isAdmin()) {
-            for (Property allProperty : propertyRepository.findAll("admin")) {
+            for (Property allProperty : propertyRepository.findAll()) {
                 if (allProperty instanceof House) {
                     House house = (House) allProperty;
                     if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
                         if (house.getSold().toLowerCase().equals("n")) {
-                            System.out.println(house.getBranchName());
                             rows.add(house);
                         }
                     }
@@ -127,7 +126,6 @@ public class HomePageController {
                     Flat flat = (Flat) allProperty;
                     if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
                         if (flat.getSold().toLowerCase().equals("n")) {
-                            System.out.println(allProperty.getBranchName());
                             rows.add(flat);
                         }
                     }
@@ -139,7 +137,6 @@ public class HomePageController {
                     House house = (House) allProperty;
                     if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
                         if (house.getSold().toLowerCase().equals("n")) {
-                            System.out.println(house.getBranchName());
                             rows.add(house);
                         }
                     }
@@ -148,7 +145,6 @@ public class HomePageController {
                     Flat flat = (Flat) allProperty;
                     if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
                         if (flat.getSold().toLowerCase().equals("n")) {
-                            System.out.println(allProperty.getBranchName());
                             rows.add(flat);
                         }
                     }
@@ -243,7 +239,73 @@ public class HomePageController {
     //Clears all items in the main table, re-populates.
     public void refresh() {
         homeTV.getItems().clear();
-        //populateTable();
+        ObservableList<Property> rows = FXCollections.observableArrayList();
+        addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
+        roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
+        sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
+        soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
+        soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
+        floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
+        gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
+        garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
+        monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
+        floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
+        idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
+        if(!isAdmin()) {
+            for (Property allProperty : propertyRepository.findByBranch(ghostSessionTF.getText())) {
+                if (allProperty instanceof House) {
+                    House house = (House) allProperty;
+                    if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            rows.add(house);
+                        }
+                    }
+                }
+                if (allProperty instanceof Flat) {
+                    Flat flat = (Flat) allProperty;
+                    if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (flat.getSold().toLowerCase().equals("n")) {
+                            rows.add(flat);
+                        }
+                    }
+                }
+            }
+        } else {
+            for (Property allProperty : propertyRepository.findAll()) {
+                if (allProperty instanceof House) {
+                    House house = (House) allProperty;
+                    if (house.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            rows.add(house);
+                        }
+                    }
+                }
+                if (allProperty instanceof Flat) {
+                    Flat flat = (Flat) allProperty;
+                    if (allProperty.getBranchName().toLowerCase().equals(ghostSessionTF.getText().toLowerCase()) || isAdmin()) {
+                        if (flat.getSold().toLowerCase().equals("n")) {
+                            rows.add(flat);
+                        }
+                    }
+                }
+            }
+        }
+        homeTV.setItems(rows);
+        homeTV.setEditable(true);
+        addressCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        roomCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        sellPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        soldCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        floorsCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        floorCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        garageCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        gardenCol.setCellFactory(ComboBoxTableCell.forTableColumn("Y", "N"));
+        monthCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        typeCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        soldPrCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        setColumnsEditable();
     }
     //Call this when save button is pressed.
     //Fetch the previous state of the properties file, add it to the global ArrayList.
@@ -252,7 +314,6 @@ public class HomePageController {
     //Write to the properties.dat file and store the house/flat objects in an ArrayList
     //Before writing, check if the sold price value has been changed, if the value is above 0, set the sold value to "Y".
     public void updateTable() {
-        fetchFile();
         House house;
         Flat flat;
         String garage = garageCol.getCellValueFactory().toString();
@@ -264,7 +325,8 @@ public class HomePageController {
             Flat replaceFlat = new Flat(Integer.parseInt((String) idCol.getCellData(i).toString()), ghostSessionTF.getText(), addressCol.getCellData(i).toString(), soldCol.getCellData(i).toString(), typeCol.getCellData(i).toString(),
                     Integer.parseInt((String) roomCol.getCellData(i).toString()), Double.parseDouble((String) sellPrCol.getCellData(i).toString()), Double.parseDouble((String) soldPrCol.getCellData(i).toString()), Integer.parseInt((String) floorCol.getCellData(i).toString()), Double.parseDouble((String) monthCol.getCellData(i).toString()),
                     gardenCol.getCellData(i).toString(), garageCol.getCellData(i).toString(), Integer.parseInt((String) floorsCol.getCellData(i).toString()));
-
+            properties.add(replaceHouse);
+            properties.add(replaceFlat);
             if(typeCol.getCellData(i).toString().equals("House")) {
                 for (int p = 0; p < properties.size(); p++) {
                     if (properties.get(p).getId() == Integer.parseInt((String) idCol.getCellData(i).toString())) {
@@ -272,6 +334,8 @@ public class HomePageController {
                             replaceHouse.setSold("Y");
                         }
                         properties.set(p, replaceHouse);
+                        propertyRepository.remove(properties.get(p).getId());
+                        propertyRepository.put(replaceHouse);
                     }
                 }
             }
@@ -282,52 +346,14 @@ public class HomePageController {
                             replaceFlat.setSold("Y");
                         }
                         properties.set(p, replaceFlat);
+                        propertyRepository.remove(properties.get(p).getId());
+                        propertyRepository.put(replaceFlat);
                     }
                 }
             }
         }
-        try {
-            OutputStream fstream = new FileOutputStream("properties.dat");
-            ObjectOutput oos = new ObjectOutputStream(fstream);
-            try {
-                oos.writeObject(properties);
-            } finally {
-                oos.close();
-            }
-        }
-        catch(IOException exception) {
-            exception.printStackTrace();
-        }
     }
-    //Reads the current state of properties.dat, stores all the objects in the ArrayList in the global ArrayList during runtime.
-    //This can be used when writing/updating properties as the current state will need to be written to the new state of the file with the addition
-    //of the updates.
-    public void fetchFile() {
-        properties.removeAll(properties);
-        try {
-            InputStream fis = new FileInputStream("properties.dat");
-            ObjectInput ois = new ObjectInputStream(fis);
-            ArrayList<Property> obj = null;
-            try {
-                while ((obj = (ArrayList<Property>) ois.readObject()) != null) {
-                    for (Property property : obj) {
-                        properties.add(property);
-                    }
-                }
-            }
-            finally {
-                ois.close();
-            }
-        } catch (EOFException ex) {
-            System.out.println("End of file reached.");
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
+
     //Removes the selected row from the table and file.
     //Prompts the user with a warning that this action cannot be reverted, would they like to proceed?
     //If yes, then update the properties.dat by fetching the current state of the file, find the ID of the property selected and remove it from the file.
@@ -349,22 +375,11 @@ public class HomePageController {
             singleRow = homeTV.getSelectionModel().getSelectedItems();
             Property selectedItems = (Property) homeTV.getSelectionModel().getSelectedItems().get(0);
             String firstCol = selectedItems.toString().split(",")[0];
-            fetchFile();
             for (int p = 0; p < properties.size(); p++) {
                 if (properties.get(p).getId() == selectedItems.getId()) {
+                    propertyRepository.remove(properties.get(p).getId());
                     properties.remove(p);
                 }
-            }
-            try {
-                OutputStream fstream = new FileOutputStream("properties.dat");
-                ObjectOutput oos = new ObjectOutputStream(fstream);
-                try {
-                    oos.writeObject(properties);
-                } finally {
-                    oos.close();
-                }
-            } catch (IOException exception) {
-                exception.printStackTrace();
             }
             singleRow.forEach(allRows::remove);
         } else if (result.get() == null) {
@@ -404,7 +419,6 @@ public class HomePageController {
                             if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
                                 if (house.getSold().toLowerCase().equals("n")) {
                                     if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                        System.out.println(house.getBranchName());
                                         rows.add(house);
                                     }
                                 }
@@ -415,7 +429,6 @@ public class HomePageController {
                             if (allProperty.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
                                 if (allProperty.getSold().toLowerCase().equals("n")) {
                                     if (allProperty.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                        System.out.println(allProperty.getBranchName());
                                         rows.add(flat);
                                     }
                                 }
@@ -466,7 +479,7 @@ public class HomePageController {
         Object temp = allHouseLoader.getController();
         AllHousesController controller = (AllHousesController) temp;
         controller.setSessionTF(getSessionName());
-        controller.populateTable();
+        controller.populateTable(ghostSessionTF.getText());
     }
     //Opens the window that shows flats.
     public void openViewFlats() throws IOException {
@@ -482,7 +495,7 @@ public class HomePageController {
         Object temp = allFlatsLoader.getController();
         AllFlatsController controller = (AllFlatsController) temp;
         controller.setSessionTF(getSessionName());
-        controller.populateTable();
+        controller.populateTable(ghostSessionTF.getText());
     }
     //Opens the window that shows all sold properties.
     public void openViewSold() throws IOException {
@@ -498,7 +511,7 @@ public class HomePageController {
         Object temp = allSoldLoader.getController();
         AllSoldController controller = (AllSoldController) temp;
         controller.setSessionTF(getSessionName());
-        controller.populateTable();
+        controller.populateTable(ghostSessionTF.getText());
     }
     //Checks if the current user is an admin.
     private boolean isAdmin() {

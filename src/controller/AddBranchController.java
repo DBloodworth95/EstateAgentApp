@@ -29,7 +29,7 @@ public class AddBranchController {
 
     public void addBranch() throws Exception {
         if(!validInput()) {
-            Branch branch = new Branch(generateID(), nameTF.getText(), addressTF.getText(), phoneTF.getText(), emailTF.getText(), webTF.getText(), usernameTF.getText(), passwordTF.getText(), nameTF.getText(), propertyRepository.findAll(nameTF.getText()));
+            Branch branch = new Branch(generateID(), nameTF.getText(), addressTF.getText(), phoneTF.getText(), emailTF.getText(), webTF.getText(), usernameTF.getText(), passwordTF.getText(), nameTF.getText(), propertyRepository.findByBranch(nameTF.getText()));
             branches.add(branch);
             branchRepository.put(branch);
             System.out.println(generateID());

@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import model.Branch;
 import model.DatPropertyRepository;
 import model.properties.Flat;
 import model.properties.Property;
@@ -14,6 +15,8 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.NoSuchElementException;
 
 public class AddFlatController {
     @FXML
@@ -32,42 +35,12 @@ public class AddFlatController {
     //Clear the forms, ready for another addition.
     public void addFlat() throws IOException {
         if(validInput()) {
-            Flat flat = new Flat(0, ghostSessionTF.getText(), addressTF.getText(), soldTF.getText(), "Flat", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
+            Flat flat = new Flat(generateID(), ghostSessionTF.getText(), addressTF.getText(), soldTF.getText(), "Flat", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
                     Double.parseDouble(soldPrTF.getText()), Integer.parseInt(floorNumberTF.getText()), Double.parseDouble(monthlyRTF.getText()), "N/A", "N/A", 0);
-            loadPrevious();
-            flat.setId(properties.size());
             clearAll();
             datPropertyRepository.put(flat);
         }
 
-    }
-    //Read the properties.dat file and fetch all of the properties in the file. Add them to the global ArrayList during runtime.
-    //This can be used whenever a new property needs to be written to file, the current state of the file must be re-written with the additional
-    //property being added.
-    public void loadPrevious() {
-        try {
-            InputStream fis = new FileInputStream("properties.dat");
-            ObjectInput ois = new ObjectInputStream(fis);
-            ArrayList<Property> obj = null;
-            try {
-                while ((obj = (ArrayList<Property>) ois.readObject()) != null) {
-                    for(int i = 0; i<obj.size(); i++) {
-                        properties.add(obj.get(i));
-                    }
-                }
-            }
-            finally {
-                ois.close();
-            }
-        } catch (EOFException ex) {
-            System.out.println("End of file reached.");
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
     }
     //Stores the username of the user logged in, this can be used as a reference to perform any checks against the user logged in.
     public void setSessionTF(String name) {
@@ -105,5 +78,13 @@ public class AddFlatController {
             }
         }
         return true;
+    }
+
+    private int generateID() {
+        Property maxId = datPropertyRepository.findAll()
+                .stream()
+                .max(Comparator.comparing(Property::getId))
+                .orElseThrow(NoSuchElementException::new);
+        return maxId.getId() + 1;
     }
 }

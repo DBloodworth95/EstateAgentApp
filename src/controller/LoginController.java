@@ -1,5 +1,4 @@
 package controller;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,7 +11,6 @@ import view.ForgotPasswordAlert;
 import view.InvalidPasswordAlert;
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 public class LoginController {
     @FXML
@@ -44,7 +42,6 @@ public class LoginController {
             FileInputStream fis = new FileInputStream("users.dat");
             ObjectInputStream ois = new ObjectInputStream(fis);
             Admin obj = null;
-
             while ((obj = (Admin)ois.readObject())!=null) {
                 if(usernameTF.getText().toLowerCase().equals(obj.getUsername()) && passwordTF.getText().toLowerCase().equals(obj.getPassword())) {
                     accountFound = true;
@@ -88,45 +85,25 @@ public class LoginController {
     //If false, display invalid username/password.
     public void checkBranchLogin() throws Exception {
         boolean branchFound = false;
-        try {
-            FileInputStream fis = new FileInputStream("branch.dat");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            ArrayList<Branch> obj = null;
-
-            while ((obj = (ArrayList<Branch>)ois.readObject())!=null) {
-                for (Branch branch : obj) {
-                    if (branchTF.getText().equals(branch.getUsername()) && branchPwTF.getText().equals(branch.getPassword())) {
-                        branchFound = true;
-                        session = new Session(null, branch);
-                        session.getBranch().setPropertyList(propertyRepository.findAll(session.getBranch().getName()));
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
-                        Parent homePage = loader.load();
-                        adminLoginBtn.getScene().setRoot(homePage);
-                        Object temp = loader.getController();
-                        HomePageController controller = (HomePageController) temp;
-                        controller.setLoggedInTF(session);
-                        controller.setTitleTF(session);
-                        controller.hideAdminPanel(session);
-                        controller.setGhostSession(session);
-                        controller.populateTable(session);
-                        break;
-                    } else {
-                        branchFound = false;
-                        branchTF.clear();
-                        branchPwTF.clear();
-                    }
-                }
-            }
-            ois.close();
-            fis.close();
-        } catch (EOFException ex) {
-            System.out.println("End of file reached.");
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        Branch branch = branchRepository.find(branchTF.getText(), branchPwTF.getText());
+        if (branch != null) {
+            branchFound = true;
+            session = new Session(null, branch);
+            session.getBranch().setPropertyList(propertyRepository.findByBranch(session.getBranch().getName()));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
+            Parent homePage = loader.load();
+            adminLoginBtn.getScene().setRoot(homePage);
+            Object temp = loader.getController();
+            HomePageController controller = (HomePageController) temp;
+            controller.setLoggedInTF(session);
+            controller.setTitleTF(session);
+            controller.hideAdminPanel(session);
+            controller.setGhostSession(session);
+            controller.populateTable(session);
+        } else {
+            branchFound = false;
+            branchTF.clear();
+            branchPwTF.clear();
         }
         if (branchFound) {
             System.out.println("Login successful");
