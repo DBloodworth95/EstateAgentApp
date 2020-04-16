@@ -1,4 +1,4 @@
-package model;
+package model.repositories;
 
 import model.properties.Property;
 import java.io.*;
@@ -9,11 +9,11 @@ import java.util.List;
 
 public class DatPropertyRepository implements PropertyRepository {
     private Path path;
-
+    //Constructs an instance of Repository, takes a path as an argument so this can be passed to the file read/writing methods.
     public DatPropertyRepository(Path path) {
         this.path = path;
     }
-
+    //Writes instances of a Property into it's own file.
     @Override
     public void put(Property property) {
         try (ObjectOutput oos = new ObjectOutputStream(new FileOutputStream(String.valueOf(path.resolve(property.getBranchName() + property.getId()))))) {
@@ -23,7 +23,11 @@ public class DatPropertyRepository implements PropertyRepository {
             e.printStackTrace();
         }
     }
-
+    //Removes a Property file based on the ID given.
+    //Loops through each file from the given file path when constructing the Repository instance.
+    //Searches through each file found for any Property instances.
+    //If a Property instance is found, check the ID with the ID given.
+    //If true, delete file.
     @Override
     public void remove(int id) {
         File directory = Paths.get(path.toString()).toFile();
@@ -46,7 +50,11 @@ public class DatPropertyRepository implements PropertyRepository {
             }
         }
     }
-
+    //Finds a property based on branch name.
+    //Loops through the file directory.
+    //Due to the naming conventions, it is possible to check if a file contains a certain branch name.
+    //If true, add the property to the list.
+    //Once finished, return the list of properties.
     @Override
     public List<Property> findByBranch(String branchName) {
         File directory = Paths.get("property/").toFile();
@@ -71,7 +79,9 @@ public class DatPropertyRepository implements PropertyRepository {
             }
         return propertyList;
     }
-
+    //Finds all Properties that are in files within the given file path when constructing the Repository.
+    //Collates all found Properties into a List.
+    //Returns the List.
     @Override
     public List<Property> findAll() {
         File directory = Paths.get("property/").toFile();

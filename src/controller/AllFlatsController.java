@@ -9,14 +9,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.DatPropertyRepository;
+import model.repositories.DatPropertyRepository;
 import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
 
-import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AllFlatsController {
@@ -31,7 +29,7 @@ public class AllFlatsController {
     private DatPropertyRepository datPropertyRepository = new DatPropertyRepository(Paths.get("property"));
     private ObservableList<Property> rows = FXCollections.observableArrayList();
     //Populates the table for the All Flats window, setup each column to accept the appropriate field from a flat.
-    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of Flat.
+    //Access the PropertyRepository, fetch a list of properties, look for any properties in the list that are an instance of Flat.
     //Check that the branch name of the flat matches the branch of the user logged in, and the flat isn't sold.
     //If true then add the flat as a row in the table.
     public void populateTable(String branchName) {

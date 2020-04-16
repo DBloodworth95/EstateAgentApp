@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.DatPropertyRepository;
+import model.repositories.DatPropertyRepository;
 import model.properties.House;
 import model.properties.Property;
 import java.io.*;
@@ -25,13 +25,11 @@ public class AddHouseController {
     private Alert errorAlert = new Alert(Alert.AlertType.INFORMATION);
     private ArrayList<Property> properties = new ArrayList<>();
     private DatPropertyRepository datPropertyRepository = new DatPropertyRepository(Paths.get("property"));
-    //Adds a house to the properties.dat file.
-    //Check that all forms are appropriate, if true then create an instance of House.
-    //Load the previous state of the file, overwrite the file with the previous state and the additional instance of House that's just been created.
-    //Clear the forms, ready for another addition.
+    //Create an instance of House, construct using fields from the input forms.
+    //Put the new House into the PropertyRepository and create a file for this.
     public void addHouse() throws IOException {
         if(validInput()) {
-            House house = new House(generateID(), ghostSessionTF.getText(), addressTF.getText(), soldTF.getText(), "House", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
+            House house = new House(generateID(), ghostSessionTF.getText(), addressTF.getText(), soldTF.getText().toUpperCase(), "House", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
                     Double.parseDouble(soldPrTF.getText()), 0, 0, gardenTF.getText(), garageTF.getText(), Integer.parseInt(floorAmountTF.getText()));
             datPropertyRepository.put(house);
             clearAll();
@@ -76,7 +74,7 @@ public class AddHouseController {
         }
         return true;
     }
-
+    //Generate a unique ID for a new Branch based on the highest ID currently existing in the PropertyRepository, increment by 1.
     private int generateID() {
         Property maxId = datPropertyRepository.findAll()
                 .stream()

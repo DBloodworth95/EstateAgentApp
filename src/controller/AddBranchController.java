@@ -7,10 +7,8 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.Branch;
-import model.DatBranchRepository;
-import model.DatPropertyRepository;
-
-import java.io.*;
+import model.repositories.DatBranchRepository;
+import model.repositories.DatPropertyRepository;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -21,22 +19,20 @@ public class AddBranchController {
     private TextField nameTF, addressTF, phoneTF, emailTF, webTF, usernameTF;
     @FXML
     private PasswordField passwordTF;
-    private ArrayList<Branch> branches = new ArrayList<>();
     private Alert errorAlert = new Alert(Alert.AlertType.INFORMATION);
     private DatPropertyRepository propertyRepository = new DatPropertyRepository(Paths.get("property"));
     private DatBranchRepository branchRepository = new DatBranchRepository(Paths.get("branch"));
 
-
+    //Create an instance of Branch, construct using fields from the input forms.
+    //Put the new Branch into the BranchRepository and create a file for this.
     public void addBranch() throws Exception {
         if(!validInput()) {
             Branch branch = new Branch(generateID(), nameTF.getText(), addressTF.getText(), phoneTF.getText(), emailTF.getText(), webTF.getText(), usernameTF.getText(), passwordTF.getText(), nameTF.getText(), propertyRepository.findByBranch(nameTF.getText()));
-            branches.add(branch);
             branchRepository.put(branch);
-            System.out.println(generateID());
             clearAll();
         }
     }
-
+    //Clears all input forms.
     public void clearAll() {
         nameTF.clear();
         addressTF.clear();
@@ -46,12 +42,12 @@ public class AddBranchController {
         usernameTF.clear();
         passwordTF.clear();
     }
-
+    //Closes the window.
     public void closeWindow() {
         Stage stage = (Stage) closeWindowBtn.getScene().getWindow();
         stage.close();
     }
-
+    //Form validation check.
     private boolean validInput() {
         TextField[] inputForms = new TextField[] {
                 nameTF, addressTF, phoneTF, emailTF, webTF, usernameTF
@@ -67,7 +63,7 @@ public class AddBranchController {
         }
         return false;
     }
-
+    //Generate a unique ID for a new Branch based on the highest ID currently existing in the BranchRepository, increment by 1.
     private int generateID() {
         Branch maxId = branchRepository.findAll()
                 .stream()

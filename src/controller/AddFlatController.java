@@ -6,15 +6,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.Branch;
-import model.DatPropertyRepository;
+import model.repositories.DatPropertyRepository;
 import model.properties.Flat;
 import model.properties.Property;
-
 import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
@@ -28,14 +24,11 @@ public class AddFlatController {
 
     private Alert errorAlert = new Alert(Alert.AlertType.INFORMATION);
     private DatPropertyRepository datPropertyRepository = new DatPropertyRepository(Paths.get("property"));
-    private ArrayList<Property> properties = new ArrayList<>();
-    //Adds a flat to the properties.dat file.
-    //Check that all forms are appropriate, if true then create an instance of Flat.
-    //Load the previous state of the file, overwrite the file with the previous state and the additional instance of Flat that's just been created.
-    //Clear the forms, ready for another addition.
+    //Create an instance of Flat, construct using fields from the input forms.
+    //Put the new Flat into the PropertyRepository and create a file for this.
     public void addFlat() throws IOException {
         if(validInput()) {
-            Flat flat = new Flat(generateID(), ghostSessionTF.getText(), addressTF.getText(), soldTF.getText(), "Flat", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
+            Flat flat = new Flat(generateID(), ghostSessionTF.getText(), addressTF.getText(), soldTF.getText().toUpperCase(), "Flat", Integer.parseInt(roomAmountTF.getText()), Double.parseDouble(sellPrTF.getText()),
                     Double.parseDouble(soldPrTF.getText()), Integer.parseInt(floorNumberTF.getText()), Double.parseDouble(monthlyRTF.getText()), "N/A", "N/A", 0);
             clearAll();
             datPropertyRepository.put(flat);
@@ -79,7 +72,7 @@ public class AddFlatController {
         }
         return true;
     }
-
+    //Generate a unique ID for a new Branch based on the highest ID currently existing in the PropertyRepository, increment by 1.
     private int generateID() {
         Property maxId = datPropertyRepository.findAll()
                 .stream()

@@ -9,14 +9,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import model.DatPropertyRepository;
+import model.repositories.DatPropertyRepository;
 import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
 
-import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AllHousesController {
@@ -30,10 +28,10 @@ public class AllHousesController {
     private Button closeBtn;
     private DatPropertyRepository datPropertyRepository = new DatPropertyRepository(Paths.get("property"));
     private ObservableList<Property> rows = FXCollections.observableArrayList();
-    //Populates the table for the All house window, setup each column to accept the appropriate field from a house.
-    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of house.
-    //Check that the branch name of the house matches the branch of the user logged in, and the house isn't sold.
-    //If true then add the house as a row in the table.
+    //Populates the table for the All House window, setup each column to accept the appropriate field from a House.
+    //Access the PropertyRepository, fetch a list of properties, look for any properties in the list that are an instance of House.
+    //Check that the branch name of the House matches the branch of the user logged in, and the House isn't sold.
+    //If true then add the House as a row in the table.
     public void populateTable(String branchName) {
         List<Property> allBranchProperties = datPropertyRepository.findByBranch(branchName);
         List<Property> allProperties = datPropertyRepository.findByBranch(branchName);

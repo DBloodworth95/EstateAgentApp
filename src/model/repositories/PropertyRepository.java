@@ -1,4 +1,7 @@
-package model;
+//Interface for our Property Repository.
+//With this it is possible to create Repositories using many data sources
+//such as files, database etc.
+package model.repositories;
 
 import model.properties.Property;
 

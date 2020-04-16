@@ -21,9 +21,12 @@ import model.*;
 import model.properties.Flat;
 import model.properties.House;
 import model.properties.Property;
+import model.repositories.DatPropertyRepository;
+
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class HomePageController {
@@ -60,7 +63,7 @@ public class HomePageController {
     //Opens the window to add a branch.
     public void openAddBranchView() throws IOException {
         FXMLLoader addBranchLoader = new FXMLLoader();
-        addBranchLoader.setLocation(getClass().getResource("/view/addBranchView.fxml"));
+        addBranchLoader.setLocation(getClass().getClassLoader().getResource("view/addBranchView.fxml"));
         Scene scene = new Scene(addBranchLoader.load(), 491,426);
         Stage stage = new Stage();
         stage.setTitle("Add a Branch!");
@@ -72,7 +75,7 @@ public class HomePageController {
     //Opens the window to edit a branch.
     public void openEditBranchView() throws Exception {
         FXMLLoader editBranchLoader = new FXMLLoader();
-        editBranchLoader.setLocation(getClass().getResource("/view/editBranchView.fxml"));
+        editBranchLoader.setLocation(getClass().getClassLoader().getResource("view/editBranchView.fxml"));
         Scene scene = new Scene(editBranchLoader.load(), 823,463);
         Stage stage = new Stage();
         stage.setTitle("Edit a Branch!");
@@ -95,7 +98,7 @@ public class HomePageController {
         }
     }
     //Populates the table for the Home page window, setup each column to accept the appropriate field from a property.
-    //Read the properties.dat file and read the properties ArrayList, look for any properties in the list that are an instance of house or flat.
+    //Loop through the list of properties returning from PropertyRepository.
     //Check that the branch name of the house/flat matches the branch of the user logged in, and the flat/house is not sold.
     //If true then add the property as a row in the table.
     public void populateTable(Session session) {
@@ -193,7 +196,7 @@ public class HomePageController {
     //Opens the window to add a house.
     public void openAddHouse() throws IOException {
         FXMLLoader addHouseLoader = new FXMLLoader();
-        addHouseLoader.setLocation(getClass().getResource("/view/addHouseView.fxml"));
+        addHouseLoader.setLocation(getClass().getClassLoader().getResource("view/addHouseView.fxml"));
         Scene scene = new Scene(addHouseLoader.load(), 600,540);
         Stage stage = new Stage();
         stage.setTitle("Add a House!");
@@ -208,7 +211,7 @@ public class HomePageController {
     //Opens the window to add a flat.
     public void openAddFlat() throws IOException {
         FXMLLoader addFlatLoader = new FXMLLoader();
-        addFlatLoader.setLocation(getClass().getResource("/view/addFlatView.fxml"));
+        addFlatLoader.setLocation(getClass().getClassLoader().getResource("view/addFlatView.fxml"));
         Scene scene = new Scene(addFlatLoader.load(), 600,540);
         Stage stage = new Stage();
         stage.setTitle("Add a Flat!");
@@ -310,9 +313,9 @@ public class HomePageController {
     //Call this when save button is pressed.
     //Fetch the previous state of the properties file, add it to the global ArrayList.
     //Loop through each row in the table, store each row in a new instance of either house or flat, based on the value in the "Type" column.
-    //Add these instances to the global ArrayList.
-    //Write to the properties.dat file and store the house/flat objects in an ArrayList
+    //Add these instances to the global ArrayList so we can update the table with the new list.
     //Before writing, check if the sold price value has been changed, if the value is above 0, set the sold value to "Y".
+    //Overwrite the files for any changes.
     public void updateTable() {
         House house;
         Flat flat;
@@ -356,8 +359,8 @@ public class HomePageController {
 
     //Removes the selected row from the table and file.
     //Prompts the user with a warning that this action cannot be reverted, would they like to proceed?
-    //If yes, then update the properties.dat by fetching the current state of the file, find the ID of the property selected and remove it from the file.
-    //Overwrite the file with the updated changes.
+    //If yes, then find the file from the PropertyRepository by referencing its ID.
+    //Delete the file.
     public void removeRow() {
         Alert alert;
         alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -393,61 +396,66 @@ public class HomePageController {
     //During this, it will perform checks such as only displaying properties that aren't sold and are from the branch as the secretary logged in.
     public void sendQuery() {
         ObservableList<Property> rows = FXCollections.observableArrayList();
-        try {
-            InputStream fis = new FileInputStream("properties.dat");
-            ObjectInput ois = new ObjectInputStream(fis);
-            ArrayList<Property> allProperties = null;
-            Property property = null;
-            addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
-            roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
-            sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
-            soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
-            typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
-            soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
-            floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
-            gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
-            garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
-            monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
-            floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
-            idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
-
-            try {
-                while ((allProperties = (ArrayList<Property>) ois.readObject()) != null) {
-                    for (Property allProperty : allProperties) {
-                        if (allProperty instanceof House) {
-                            House house = (House) allProperty;
-                            if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
-                                if (house.getSold().toLowerCase().equals("n")) {
-                                    if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                        rows.add(house);
-                                    }
-                                }
-                            }
-                        }
-                        if (allProperty instanceof Flat) {
-                            Flat flat = (Flat) allProperty;
-                            if (allProperty.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
-                                if (allProperty.getSold().toLowerCase().equals("n")) {
-                                    if (allProperty.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
-                                        rows.add(flat);
-                                    }
-                                }
+        List<Property> allProperties = propertyRepository.findAll();
+        List<Property> allBranchProperties = propertyRepository.findByBranch(ghostSessionTF.getText());
+        addressCol.setCellValueFactory(new PropertyValueFactory<Property, String>("address"));
+        roomCol.setCellValueFactory(new PropertyValueFactory<Property, String>("roomAmount"));
+        sellPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("sellPrice"));
+        soldPrCol.setCellValueFactory(new PropertyValueFactory<Property, Double>("soldPrice"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<Property, String>("type"));
+        soldCol.setCellValueFactory(new PropertyValueFactory<Property, String>("sold"));
+        floorsCol.setCellValueFactory(new PropertyValueFactory<House, String>("floorAmount"));
+        gardenCol.setCellValueFactory(new PropertyValueFactory<House, String>("garden"));
+        garageCol.setCellValueFactory(new PropertyValueFactory<House, String>("garage"));
+        monthCol.setCellValueFactory(new PropertyValueFactory<Flat, Double>("monthlyRate"));
+        floorCol.setCellValueFactory(new PropertyValueFactory<Flat, String>("floorNumber"));
+        idCol.setCellValueFactory(new PropertyValueFactory<Property, Integer>("id"));
+        if(isAdmin()) {
+            for (Property property : allProperties) {
+                if (property instanceof House) {
+                    House house = (House) property;
+                    if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                rows.add(house);
                             }
                         }
                     }
                 }
-            } finally {
-
-                ois.close();
+                if (property instanceof Flat) {
+                    Flat flat = (Flat) property;
+                    if (property.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                        if (property.getSold().toLowerCase().equals("n")) {
+                            if (property.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                rows.add(flat);
+                            }
+                        }
+                    }
+                }
             }
-        } catch (EOFException ex) {
-            System.out.println("End of file reached.");
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } else {
+            for (Property property : allBranchProperties) {
+                if (property instanceof House) {
+                    House house = (House) property;
+                    if (house.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                        if (house.getSold().toLowerCase().equals("n")) {
+                            if (house.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                rows.add(house);
+                            }
+                        }
+                    }
+                }
+                if (property instanceof Flat) {
+                    Flat flat = (Flat) property;
+                    if (property.getBranchName().equals(ghostSessionTF.getText()) || isAdmin()) {
+                        if (property.getSold().toLowerCase().equals("n")) {
+                            if (property.getAddress().toLowerCase().contains(searchTF.getText().toLowerCase())) {
+                                rows.add(flat);
+                            }
+                        }
+                    }
+                }
+            }
         }
         homeTV.setItems(rows);
         homeTV.setEditable(true);
@@ -468,7 +476,7 @@ public class HomePageController {
     //Opens the window that shows houses.
     public void openViewHouses() throws IOException {
         FXMLLoader allHouseLoader = new FXMLLoader();
-        allHouseLoader.setLocation(getClass().getResource("/view/AllHousesView.fxml"));
+        allHouseLoader.setLocation(getClass().getClassLoader().getResource("view/AllHousesView.fxml"));
         Scene scene = new Scene(allHouseLoader.load(), 895,667);
         Stage stage = new Stage();
         stage.setTitle("View all Houses!");
@@ -484,7 +492,7 @@ public class HomePageController {
     //Opens the window that shows flats.
     public void openViewFlats() throws IOException {
         FXMLLoader allFlatsLoader = new FXMLLoader();
-        allFlatsLoader.setLocation(getClass().getResource("/view/AllFlatsView.fxml"));
+        allFlatsLoader.setLocation(getClass().getClassLoader().getResource("view/AllFlatsView.fxml"));
         Scene scene = new Scene(allFlatsLoader.load(), 895,667);
         Stage stage = new Stage();
         stage.setTitle("View all Flats!");
@@ -500,7 +508,7 @@ public class HomePageController {
     //Opens the window that shows all sold properties.
     public void openViewSold() throws IOException {
         FXMLLoader allSoldLoader = new FXMLLoader();
-        allSoldLoader.setLocation(getClass().getResource("/view/AllSoldView.fxml"));
+        allSoldLoader.setLocation(getClass().getClassLoader().getResource("view/AllSoldView.fxml"));
         Scene scene = new Scene(allSoldLoader.load(), 895,667);
         Stage stage = new Stage();
         stage.setTitle("View all Sold!");
@@ -522,7 +530,7 @@ public class HomePageController {
     public void handleLogout() throws IOException {
         Stage stage = (Stage) logoutBtn.getScene().getWindow();
         stage.close();
-        Parent root = FXMLLoader.load(getClass().getResource("../view/loginView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("view/loginView.fxml"));
         stage.setTitle("National Estate Agents Application");
         stage.setScene(new Scene(root, 1200, 800));
         stage.setResizable(false);

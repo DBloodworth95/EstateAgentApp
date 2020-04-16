@@ -1,6 +1,7 @@
 package model;
 
 import model.properties.Property;
+import model.repositories.DatBranchRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import java.io.File;

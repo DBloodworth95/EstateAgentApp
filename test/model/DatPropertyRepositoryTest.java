@@ -1,7 +1,7 @@
 package model;
 
 import model.properties.Flat;
-import model.properties.Property;
+import model.repositories.DatPropertyRepository;
 import org.junit.Assert;
 
 import java.io.*;

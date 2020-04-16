@@ -11,10 +11,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.converter.IntegerStringConverter;
 import model.Branch;
-import model.DatBranchRepository;
-import model.DatPropertyRepository;
+import model.repositories.DatBranchRepository;
+import model.repositories.DatPropertyRepository;
 
 import java.io.*;
 import java.nio.file.Paths;

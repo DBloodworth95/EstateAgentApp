@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("../view/loginView.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("view/loginView.fxml"));
         primaryStage.setTitle("National Estate Agents Application");
         primaryStage.setScene(new Scene(root, 1200, 800));
         primaryStage.setResizable(false);

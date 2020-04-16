@@ -6,6 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import model.*;
+import model.repositories.DatBranchRepository;
+import model.repositories.DatPropertyRepository;
 import view.HelpAlert;
 import view.ForgotPasswordAlert;
 import view.InvalidPasswordAlert;
@@ -47,7 +49,7 @@ public class LoginController {
                     accountFound = true;
                     session = new Session(obj, null);
                     session.getAdmin().setPropertyList(branchRepository.findAll());
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
+                    FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/homePageView.fxml"));
                     Parent homePage = loader.load();
                     adminLoginBtn.getScene().setRoot(homePage);
                     Object temp = loader.getController();
@@ -80,7 +82,7 @@ public class LoginController {
         }
     }
 
-    //Processes an branch secretary login, reads the branch.dat file for any credentials matching that in the login forms.
+    //Processes an branch secretary login, accesses the BranchRepository and fetches a branch that may match the credentials.
     //If true, display the home page, populate the home page table and set the "Logged in as" text to show the users name.
     //If false, display invalid username/password.
     public void checkBranchLogin() throws Exception {
@@ -90,7 +92,7 @@ public class LoginController {
             branchFound = true;
             session = new Session(null, branch);
             session.getBranch().setPropertyList(propertyRepository.findByBranch(session.getBranch().getName()));
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/homePageView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("view/homePageView.fxml"));
             Parent homePage = loader.load();
             adminLoginBtn.getScene().setRoot(homePage);
             Object temp = loader.getController();
